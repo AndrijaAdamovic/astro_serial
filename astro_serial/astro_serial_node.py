@@ -5,6 +5,7 @@ import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import JointState
+from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy
 
 class AstroSerial(Node):
     def __init__(self):
@@ -15,13 +16,18 @@ class AstroSerial(Node):
             self.callback,
             10
         )
+        qos_profile = QoSProfile(
+            reliability=QoSReliabilityPolicy.RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT,
+            history=QoSHistoryPolicy.RMW_QOS_POLICY_HISTORY_KEEP_LAST,
+            depth=1
+        )
 
         self.publisher = self.create_publisher(
             JointState, 
             "/joint_states",
-            10)
-        period = 0.01
-        self.timer = self.create_timer(period, self.timer_callback)
+            qos_profile)
+        period = 0.0001
+        self.timer = self.create_timer(period, self.timer_callback, clock=self.get_clock())
 
         self.wheelRadius = 0.036
         self.wheelSeparation = 0.289
@@ -59,9 +65,7 @@ class AstroSerial(Node):
             msg.velocity = rawJointStates_list[2:4]
             msg.header.stamp = self.get_clock().now().to_msg()
             msg.header.frame_id = "base_link"
-            self.publisher.publish(msg)
-
-            
+            self.publisher.publish(msg)    
 
 def main(args=None):
     rclpy.init(args=args)
