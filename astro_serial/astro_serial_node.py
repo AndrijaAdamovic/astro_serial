@@ -46,13 +46,7 @@ class AstroSerial(Node):
         linear_x = msg.linear.x
         angular_z = msg.angular.z
         self.sendVelocity(linearX=linear_x, angularZ=angular_z)
-        msg = JointState()
-        msg.name = ["left_motor_joint", "right_motor_joint"]
-        msg.position = [1.0, 1.0]
-        msg.velocity = [2.0, 2.0]
-        msg.header.stamp = self.get_clock().now().to_msg()
-        msg.header.frame_id = "base_link"
-        self.publisher.publish(msg)
+
 
     def timer_callback(self):
         if self.serial.in_waiting:
