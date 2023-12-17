@@ -5,6 +5,7 @@ import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import JointState
+from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy
 
 class AstroSerial(Node):
     def __init__(self):
@@ -16,10 +17,16 @@ class AstroSerial(Node):
             10
         )
 
+        qos_profile = QoSProfile(
+            reliability=QoSReliabilityPolicy.RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT,
+            history=QoSHistoryPolicy.RMW_QOS_POLICY_HISTORY_KEEP_LAST,
+            depth=1
+        )
+
         self.publisher = self.create_publisher(
             JointState, 
             "/joint_states",
-            10)
+            qos_profile)
         
         period = 0.0001
         self.timer = self.create_timer(period, self.timer_callback, clock=self.get_clock())
